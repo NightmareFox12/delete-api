@@ -11,7 +11,42 @@ import { RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class UserService {
-  async createUser(user: User, res: Response) {
+  async login(user: User, res: Response<any, Record<string, any>>) {
+    const { email, password } = user
+
+    // validation
+    if (email === undefined)
+      return res.status(400).json({ message: 'El correo electrónico es requerido.' });
+    if (password === undefined)
+      return res.status(400).json({ message: 'La contraseña es requerida.' });
+
+    //zod validation
+    const emailZod = emailSchema.safeParse(email);
+    if (!emailZod.success)
+      return res.status(400).json({ message: emailZod.error.errors[0].message });
+
+    const passwordZod = passwordSchema.safeParse(password);
+    if (!passwordZod.success)
+      return res.status(400).json({ message: passwordZod.error.errors[0].message });
+
+    // connection
+    const conn = await connection();
+
+    const [row] = await conn.query<RowDataPacket[]>(
+      'SELECT userID, email, password FROM user WHERE email = ?',
+      [email]
+    );
+
+
+    if (row.length === 0) return res.status(400).json({ message: 'El usuario electrónico no existe' });
+    const result = await bcrypt.compare(password, row[0].password);
+
+    if (!result) return res.status(400).json({ message: 'La contraseña no es correcta' });
+
+    return res.status(200).json({ userID: row[0].userID });
+  }
+
+  async createUser(user: User, res: Response<any, Record<string, any>>) {
     const { name, lastName, email, password } = user
 
     // validation

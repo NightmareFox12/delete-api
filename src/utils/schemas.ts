@@ -7,7 +7,7 @@ export const nameSchema = z
   .min(2, {
     message: 'El nombre debe tener al menos 2 caracteres.',
   })
-  .regex(/^[a-zA-Z\s]+$/, {
+  .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El nombre no puede tener números ni caracteres especiales.',
   });
 
@@ -18,7 +18,7 @@ export const lastNameSchema = z
   .min(2, {
     message: 'El apellido debe tener al menos 2 caracteres.',
   })
-  .regex(/^[a-zA-Z\s]+$/, {
+  .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El apellido no puede tener números ni caracteres especiales.',
   });
 

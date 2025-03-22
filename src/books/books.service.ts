@@ -117,11 +117,36 @@ export class BooksService {
       const conn = await connection();
 
       const [row] = await conn.query<RowDataPacket[]>(
-        `SELECT lb.like_bookID AS likeBookID, u.name, lb.book_key AS bookKey, lb.date 
-         FROM like_book AS lb
-         JOIN user AS u 
-         ON u.userID = lb.userID`,
+        `SELECT lb.like_bookID AS likeBookID, 
+          u.name AS userName, 
+          lb.book_key AS bookKey, 
+          lb.book_title AS bookTitle, 
+          lb.date 
+          FROM like_book AS lb
+          JOIN user AS u 
+          ON u.userID = lb.userID`,
       );
+
+      return res.status(200).json({ likes: row });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(500)
+        .json({ err: 'Ha ocurrido un error con la conexión.' });
+    }
+  }
+
+  async getLikeStats(res: Response) {
+    try {
+      const conn = await connection();
+
+      const [row] = await conn.query<
+        RowDataPacket[]
+      >(`SELECT book_title AS bookTitle, COUNT(*) AS totalLikes
+      FROM like_book
+      GROUP BY book_key, book_title
+      ORDER BY totalLikes DESC
+      LIMIT 10`);
 
       return res.status(200).json({ likes: row });
     } catch (err) {

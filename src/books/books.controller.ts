@@ -26,4 +26,9 @@ export class BooksController {
   async getAllLikes(@Res() res: Response) {
     return this.booksService.getAllLikes(res);
   }
+
+  @Get('/like-stats')
+  async getLikeStats(@Res() res: Response) {
+    return this.booksService.getLikeStats(res);
+  }
 }

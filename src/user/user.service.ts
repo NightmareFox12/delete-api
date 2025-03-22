@@ -41,23 +41,32 @@ export class UserService {
         .json({ message: passwordZod.error.errors[0].message });
 
     // connection
-    const conn = await connection();
+    try {
+      const conn = await connection();
 
-    const [row] = await conn.query<RowDataPacket[]>(
-      'SELECT userID, email, password FROM user WHERE email = ?',
-      [email],
-    );
+      const [row] = await conn.query<RowDataPacket[]>(
+        'SELECT userID, email, password FROM user WHERE email = ?',
+        [email],
+      );
 
-    if (row.length === 0)
+      if (row.length === 0)
+        return res
+          .status(400)
+          .json({ message: 'El usuario electrónico no existe' });
+      const result = await bcrypt.compare(password, row[0].password);
+
+      if (!result)
+        return res
+          .status(400)
+          .json({ message: 'La contraseña no es correcta' });
+
+      return res.status(200).json({ userID: row[0].userID });
+    } catch (err) {
+      console.log(err);
       return res
-        .status(400)
-        .json({ message: 'El usuario electrónico no existe' });
-    const result = await bcrypt.compare(password, row[0].password);
-
-    if (!result)
-      return res.status(400).json({ message: 'La contraseña no es correcta' });
-
-    return res.status(200).json({ userID: row[0].userID });
+        .status(500)
+        .json({ message: 'Ha ocurrido un error con la conexión.' });
+    }
   }
 
   async createUser(user: User, res: Response<any, Record<string, any>>) {
@@ -190,7 +199,7 @@ export class UserService {
     try {
       const conn = await connection();
       const [row] = await conn.query<RowDataPacket[]>(
-        'SELECT COUNT(*) AS `unlock` FROM user WHERE block = 0'
+        'SELECT COUNT(*) AS `unlock` FROM user WHERE block = 0',
       );
 
       const [row2] = await conn.query<RowDataPacket[]>(

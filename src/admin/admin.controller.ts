@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { Response } from 'express';
 import { Admin } from 'src/entity/Admin.entity';

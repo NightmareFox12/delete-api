@@ -52,6 +52,7 @@ export class AdminService {
         expiresIn: '2d',
       });
 
+      conn.end();
       return res.status(200).json({ admin: true, token });
     } catch (err) {
       console.log(err);
@@ -94,6 +95,7 @@ export class AdminService {
         email,
         hashedPassword,
       ]);
+      conn.end();
       return res.status(200).json({ message: 'Admin created successfully.' });
     } catch (err) {
       console.log(err);

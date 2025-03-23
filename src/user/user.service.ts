@@ -9,6 +9,7 @@ import {
   lastNameSchema,
   emailSchema,
   passwordSchema,
+  birthDateSchema,
 } from 'src/utils/schemas';
 import { Response } from 'express';
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
@@ -60,6 +61,7 @@ export class UserService {
           .status(400)
           .json({ message: 'La contraseña no es correcta' });
 
+      conn.end();
       return res.status(200).json({ userID: row[0].userID });
     } catch (err) {
       console.log(err);
@@ -70,7 +72,7 @@ export class UserService {
   }
 
   async createUser(user: User, res: Response<any, Record<string, any>>) {
-    const { name, lastName, email, password } = user;
+    const { name, lastName, email, birthDate, password } = user;
 
     // validation
     if (name === undefined)
@@ -81,6 +83,10 @@ export class UserService {
       return res
         .status(400)
         .json({ message: 'El correo electrónico es requerido.' });
+    if (birthDate === undefined)
+      return res
+        .status(400)
+        .json({ message: 'La fecha de nacimiento es requerida.' });
     if (password === undefined)
       return res.status(400).json({ message: 'La contraseña es requerida.' });
 
@@ -100,6 +106,12 @@ export class UserService {
       return res
         .status(400)
         .json({ message: emailZod.error.errors[0].message });
+
+    const birthDateZod = birthDateSchema.safeParse(birthDate);
+    if (!birthDateZod.success)
+      return res
+        .status(400)
+        .json({ message: birthDateZod.error.errors[0].message });
 
     const passwordZod = passwordSchema.safeParse(password);
     if (!passwordZod.success)
@@ -124,10 +136,12 @@ export class UserService {
     const passwordHash = bcrypt.hashSync(password, salt);
 
     const [row2] = await conn.query<any>(
-      'INSERT user(name, last_name, email, password) VALUES(?, ?, ?, ?)',
-      [name, lastName, email, passwordHash],
+      'INSERT user(name, last_name, email, birth_date, password) VALUES(?, ?, ?, ?, ?)',
+      [name, lastName, email, birthDate, passwordHash],
     );
 
+    conn.end();
+    
     //firebase
     const auth = getAuth();
     createUserWithEmailAndPassword(auth, email, password)
@@ -152,6 +166,8 @@ export class UserService {
       const [row] = await conn.query<RowDataPacket[]>(
         'SELECT userID, name, last_name AS lastName, email, block, date FROM user',
       );
+      conn.end();
+
       return res.status(200).send({ users: row });
     } catch (err) {
       console.log(err);

@@ -62,12 +62,18 @@ export class BooksService {
         [book_key, userID],
       );
 
+      conn.end();
+
       return res.status(200).json({
         likes: row[0].total_likes,
         userLiked: row2[0].userLiked === 0 ? false : true,
       });
+
     } catch (err) {
       console.log(err);
+      return res
+        .status(500)
+        .json({ err: 'Ha ocurrido un error con la conexión.' });
     }
   }
 
@@ -101,6 +107,7 @@ export class BooksService {
           [userID, book_key, book_title],
         );
       }
+      conn.end();
 
       return res.status(200).json({ success: true });
     } catch (err) {
@@ -127,6 +134,8 @@ export class BooksService {
           ON u.userID = lb.userID`,
       );
 
+      conn.end();
+
       return res.status(200).json({ likes: row });
     } catch (err) {
       console.log(err);
@@ -147,6 +156,8 @@ export class BooksService {
       GROUP BY book_key, book_title
       ORDER BY totalLikes DESC
       LIMIT 10`);
+
+      conn.end();
 
       return res.status(200).json({ likes: row });
     } catch (err) {

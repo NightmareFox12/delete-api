@@ -27,6 +27,10 @@ export const emailSchema = z
   .email({ message: 'Correo inválido' })
   .min(5, { message: 'El correo debe tener al menos 5 caracteres.' });
 
+export const birthDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+  message: 'La fecha de nacimiento debe tener el formato YYYY-MM-DD.',
+});
+
 export const passwordSchema = z
   .string()
   .min(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })

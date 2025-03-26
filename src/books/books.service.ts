@@ -6,10 +6,12 @@ import { RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class BooksService {
-  async getBooks(res: Response) {
+  async getBooks(res: Response, req: Request) {
+    const titleBook = req.query.title ?? 'sostenibilidad';
+
     try {
       const response = await fetch(
-        'https://openlibrary.org/search.json?q=sostenibilidad&limit=30',
+        `https://openlibrary.org/search.json?q=${titleBook}&limit=30`,
       );
       const data = await response.json();
 
@@ -68,7 +70,6 @@ export class BooksService {
         likes: row[0].total_likes,
         userLiked: row2[0].userLiked === 0 ? false : true,
       });
-
     } catch (err) {
       console.log(err);
       return res

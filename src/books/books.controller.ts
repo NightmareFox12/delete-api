@@ -7,8 +7,8 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Get()
-  async getBooks(@Res() res: Response) {
-    return this.booksService.getBooks(res);
+  async getBooks(@Res() res: Response, @Req() req: Request) {
+    return this.booksService.getBooks(res, req);
   }
 
   @Get('/like')

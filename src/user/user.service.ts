@@ -228,7 +228,7 @@ export class UserService {
     } catch (err) {
       console.log(err);
       return res.status(500).send({
-        message: 'Ha ocurrido un error al obtener el conteo de usuarios',
+        err: 'Ha ocurrido un error al obtener el conteo de usuarios',
       });
     }
   }

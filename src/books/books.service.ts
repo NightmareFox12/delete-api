@@ -13,6 +13,7 @@ export class BooksService {
       const response = await fetch(
         `https://openlibrary.org/search.json?q=${titleBook}&limit=30`,
       );
+
       const data = await response.json();
 
       const books = data.docs.map((book: Book) => ({
@@ -152,15 +153,21 @@ export class BooksService {
 
       const [row] = await conn.query<
         RowDataPacket[]
-      >(`SELECT book_title AS bookTitle, COUNT(*) AS totalLikes
+      >(`SELECT book_title AS bookTitle, COUNT(*) AS bookLikes
       FROM like_book
       GROUP BY book_key, book_title
-      ORDER BY totalLikes DESC
+      ORDER BY bookLikes DESC
       LIMIT 10`);
+
+      const [row2] = await conn.query<
+        RowDataPacket[]
+      >('SELECT COUNT(like_bookID) AS totalLikes FROM like_book');
 
       conn.end();
 
-      return res.status(200).json({ likes: row });
+      return res
+        .status(200)
+        .json({ likes: row, totalLikes: row2[0].totalLikes });
     } catch (err) {
       console.log(err);
       return res
